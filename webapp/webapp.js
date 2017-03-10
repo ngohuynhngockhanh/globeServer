@@ -58,12 +58,57 @@ angular.module('myApp', [
 	$scope.updateServo = function(servoPosition) {
 		
 		var json = {
-			"degree": servoPosition,
-			"message": "Goc ne: " + servoPosition
+			"pos": servoPosition
 		}
 		
 		console.log("SEND SERVO", json) //debug chơi à
 		mySocket.emit("SERVO", json)
+	}
+	$scope.updateCycle = function(cycle) {
+		var json = {
+			"cycle": cycle
+		}
+		
+		console.log("SEND CYCLE", json) //debug chơi à
+		mySocket.emit("CYCLE", json)
+	}
+	
+	$scope.updatePosition = function(position) {
+		var json = {
+			"position": position
+		}
+		
+		console.log("SEND POSITION", json) //debug chơi à
+		mySocket.emit("POSITION", json)
+	}
+	
+	$scope.updateSpeed = function(speed) {
+		var json = {
+			"speed": speed
+		}
+		
+		console.log("SEND SPEED", json) //debug chơi à
+		mySocket.emit("SPEED", json)
+	}
+	
+	$scope.updateDirection = function(direction, speed) {
+		var json = {
+			"dir": direction,
+			"speed": speed
+		}
+		
+		console.log("SEND DIRECTION", json) //debug chơi à
+		mySocket.emit("DIRECTION", json)
+	}
+	
+	$scope.ledOn = function() {
+		mySocket.emit("LED", {status: 1})
+		console.log("led on")
+	}
+	
+	$scope.ledOff = function() {
+		mySocket.emit("LED", {status: 0})
+		console.log("led off")
 	}
 	
 	////Khu 3 -- Nhận dữ liệu từ Arduno gửi lên (thông qua ESP8266 rồi socket server truyền tải!)
@@ -77,6 +122,11 @@ angular.module('myApp', [
 		console.log("recv LED", json)
 		$scope.leds_status = json.data
 	})
+	mySocket.on('ENCODER', function(json) {
+		var pos = json.position
+		$scope.encoder_position = pos
+		console.log("encoder", json)
+	})
 	//khi nhận được lệnh Button
 	mySocket.on('BUTTON', function(json) {
 		//Nhận được thì in ra thôi hihi.
@@ -84,6 +134,16 @@ angular.module('myApp', [
 		$scope.buttons = json.data
 	})
 	
+	mySocket.on("TABLE_SERVO", function(json) {
+		var speed = json.speed
+		var direction = json.direction
+		console.log(json)
+		setTimeout(function() {
+			$scope.speed = speed
+			$scope.direction = direction
+		}, 500);
+		
+	})
 	
 	//// Khu 4 -- Những dòng code sẽ được thực thi khi kết nối với Arduino (thông qua socket server)
 	mySocket.on('connect', function() {
